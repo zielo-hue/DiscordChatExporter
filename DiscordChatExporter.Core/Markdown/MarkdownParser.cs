@@ -262,13 +262,13 @@ namespace DiscordChatExporter.Core.Markdown
         private static readonly IMatcher<MarkdownNode> MinimalAggregateNodeMatcher = new AggregateMatcher<MarkdownNode>(
             // Mentions
             EveryoneMentionNodeMatcher,
-            HereMentionNodeMatcher,
-            UserMentionNodeMatcher,
-            ChannelMentionNodeMatcher,
-            RoleMentionNodeMatcher,
+            HereMentionNodeMatcher
+            // UserMentionNodeMatcher,
+            // ChannelMentionNodeMatcher,
+            // RoleMentionNodeMatcher
 
             // Emoji
-            CustomEmojiNodeMatcher
+            // CustomEmojiNodeMatcher
         );
 
         private static IReadOnlyList<MarkdownNode> Parse(StringPart stringPart, IMatcher<MarkdownNode> matcher) =>

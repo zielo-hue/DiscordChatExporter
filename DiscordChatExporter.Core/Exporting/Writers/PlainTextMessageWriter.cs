@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -26,12 +27,13 @@ namespace DiscordChatExporter.Core.Exporting.Writers
         private async ValueTask WriteMessageHeaderAsync(Message message)
         {
             // Timestamp & author
-            await _writer.WriteAsync($"[{Context.FormatDate(message.Timestamp)}]");
-            await _writer.WriteAsync($" {message.Author.FullName}");
+            /*await _writer.WriteAsync($"[{Context.FormatDate(message.Timestamp)}]");*/
+            // await _writer.WriteAsync($"{message.Author.FullName}:");
+            await _writer.WriteAsync($"<@{message.Author.Id}>:");
 
             // Whether the message is pinned
-            if (message.IsPinned)
-                await _writer.WriteAsync(" (pinned)");
+            /*if (message.IsPinned)
+                await _writer.WriteAsync(" (pinned)");*/
 
             await _writer.WriteLineAsync();
         }
@@ -130,6 +132,18 @@ namespace DiscordChatExporter.Core.Exporting.Writers
 
         public override async ValueTask WriteMessageAsync(Message message)
         {
+            if (message.Attachments.Any() ||
+                message.Embeds.Any() ||
+                message.Content.Contains("Joined the server.") ||
+                message.Content.Contains("Pinned a message.") ||
+                message.Author.IsBot
+                )
+                return;
+
+            if (message.MentionedUsers.Count > 0)
+                if (message.Content == "<@" + message.MentionedUsers.First().Id + ">") // for readability llo
+                    return; // return if the message is just a mention by itself
+            
             await WriteMessageHeaderAsync(message);
 
             if (!string.IsNullOrWhiteSpace(message.Content))
@@ -137,11 +151,11 @@ namespace DiscordChatExporter.Core.Exporting.Writers
 
             await _writer.WriteLineAsync();
 
-            await WriteAttachmentsAsync(message.Attachments);
-            await WriteEmbedsAsync(message.Embeds);
-            await WriteReactionsAsync(message.Reactions);
+            // await WriteAttachmentsAsync(message.Attachments);
+            // await WriteEmbedsAsync(message.Embeds);
+            // await WriteReactionsAsync(message.Reactions);
 
-            await _writer.WriteLineAsync();
+            // await _writer.WriteLineAsync();
 
             _messageCount++;
         }
